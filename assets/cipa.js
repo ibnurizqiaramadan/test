@@ -7,10 +7,11 @@ window.onload = function () {
 }
 
 function connectSocket() {
-    socket = io.connect(`https://dev.xyrus10.com`)
-    // socket = io.connect(`http://localhost:6996`)
+    // socket = io.connect(`http://20.185.60.9:6996`)
+    socket = io.connect(`http://localhost:6996`)
     socket.on("connect", () => {
         console.log("socket connected")
+        socket.emit('connected')
         socket.emit('getContent')
     });
 
@@ -21,6 +22,17 @@ function connectSocket() {
     socket.on('reciveContent', delta => {
         quill.setContents(delta)
     })
+
+    socket.on('userListUpdate', clientList => {
+        // console.log(clientList)
+        let playerList = document.getElementById('playerList')
+        // console.log(playerList)
+        let players = ``
+        clientList.forEach(player => {
+            if (typeof player?.username !== null) players += `<li>${player?.username ?? '-'}</li>`
+        })
+        playerList.innerHTML = players
+    })
 }
 
 function initQuill() {
@@ -29,12 +41,6 @@ function initQuill() {
     });
 
     quill.on('text-change', function (delta, oldDelta, source) {
-        if (source == 'api') {
-            console.log("An API call triggered this change.");
-        } else if (source == 'user') {
-            console.log("A user action triggered this change.");
-        }
-        // console.log(delta);
         socket.emit('change', delta, oldDelta, source)
     });
 }

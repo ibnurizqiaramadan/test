@@ -24,6 +24,7 @@ const io = require("socket.io")(http, {
 });
 
 var clientList = []
+var clientList2 = []
 var oldDeltaData = []
 
 function cekUsername(username) {
@@ -37,12 +38,14 @@ function cekUsername(username) {
 
 io.on("connection", socket => {
 
-    socket.on('connected', userData => {
+    socket.on('connected', () => {
         // if (!) console.log("hadehh");
-        if (!cekUsername(userData.username)) return socket.emit('error', "Username sudah ada")
+        // if (!cekUsername(userData.username)) return socket.emit('error', "Username sudah ada")
         console.log(`User Connected`)
-        clientList[socket.id] = {userData: userData, room:socket.rooms}
-        console.log(clientList[socket.id])
+        clientList[socket.id] = {username: socket.id, room:socket.rooms}
+        clientList2.push({username: socket.id, room:socket.rooms})
+        console.log(clientList)
+        io.emit("userListUpdate", clientList2)
     })
 
     socket.on('change', (delta, oldDelta, source) => {
@@ -57,7 +60,15 @@ io.on("connection", socket => {
 
     socket.on("disconnect", (reason) => {
         console.log("user leave", reason, clientList[socket.id])
-        delete(clientList[socket.id])
+        let flag = 0
+        Object.keys(clientList2).forEach(item => {
+            if (clientList2[item].username == socket.id) flag = item;
+            // console.log(clientList[item])
+        })
+        console.log(flag)
+        // delete(clientList2[flag])
+        clientList2.splice(flag, 1)
+        io.emit("userListUpdate", clientList2)
     })
 
 })
