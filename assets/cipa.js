@@ -7,7 +7,8 @@ window.onload = function () {
 }
 
 function connectSocket() {
-    socket = io.connect(`http://localhost:6996`)
+    socket = io.connect(`https://dev.xyrus10.com`)
+    // socket = io.connect(`http://localhost:6996`)
     socket.on("connect", () => {
         console.log("socket connected")
         socket.emit('getContent')
